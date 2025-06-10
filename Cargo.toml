@@ -1,0 +1,32 @@
+[package]
+name = 'tsf-again'
+version = '0.1.0'
+edition = '2024'
+rust-version = '1.87.0'
+
+[lib]
+crate-type = ['cdylib']
+
+[dependencies]
+anyhow = '1'
+widestring = '1.2.0'
+lcid = '0.3.0'
+windows-registry = '0.5.2'
+log = '0.4.27'
+
+windows-core = '0.61.2'
+
+[dependencies.windows]
+version = '0.61.1'
+features = [
+	'Win32_UI_TextServices',
+	'Win32_System_SystemServices',
+	'Win32_System_LibraryLoader',
+	'Win32_UI_WindowsAndMessaging',
+	'Win32_System_Com',
+	'Win32_System_Diagnostics_Debug',
+	'Win32_UI_Input_KeyboardAndMouse',
+]
+
+[build-dependencies]
+windres = '0.2'
