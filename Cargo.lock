@@ -496,9 +496,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "kime-engine-backend",
+ "kime-engine-backend-hangul",
  "kime-engine-core",
  "lcid",
  "log",
+ "serde",
+ "serde_yaml",
  "widestring",
  "windows",
  "windows-core",

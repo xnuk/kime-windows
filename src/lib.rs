@@ -13,3 +13,5 @@ mod text_service;
 mod key_event;
 
 mod logger;
+
+mod config;
