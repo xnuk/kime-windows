@@ -1,6 +1,10 @@
-use windows::Win32::System::SystemServices::DLL_PROCESS_ATTACH;
+use windows::Win32::System::{
+	Com::IClassFactory, SystemServices::DLL_PROCESS_ATTACH,
+};
 
 use crate::{
+	class_factory::ComFactory,
+	logger, meta,
 	prelude::*,
 	register::{self, Registerable, get_module_path},
 };
@@ -27,6 +31,9 @@ pub extern "system" fn DllMain(
 ) -> BOOL {
 	if reason == DLL_PROCESS_ATTACH {
 		unsafe { DLL_INSTANCE = dll_instance };
+
+		logger::init();
+		log::debug!("logging started");
 	}
 	true.into()
 }
@@ -37,7 +44,22 @@ pub extern "system" fn DllGetClassObject(
 	riid: *const GUID,
 	pout: *mut *mut c_void,
 ) -> HRESULT {
-	Ok(()).into()
+	let rclsid = unsafe { &*rclsid };
+	let riid = unsafe { &*riid };
+	let pout = unsafe { &mut *pout };
+
+	*pout = ptr::null_mut();
+
+	if *rclsid != meta::CLSID.guid {
+		return CLASS_E_CLASSNOTAVAILABLE;
+	}
+
+	if *riid != IClassFactory::IID {
+		return E_UNEXPECTED;
+	}
+
+	let factory: IUnknown = ComFactory.into_object().into_interface();
+	unsafe { factory.query(riid, pout) }
 }
 
 #[unsafe(no_mangle)]

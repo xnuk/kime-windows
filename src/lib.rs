@@ -5,3 +5,11 @@ mod meta;
 
 mod dll;
 mod register;
+
+mod class_factory;
+mod my_text_service;
+mod text_service;
+
+mod key_event;
+
+mod logger;
