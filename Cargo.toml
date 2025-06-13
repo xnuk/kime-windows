@@ -28,5 +28,13 @@ features = [
 	'Win32_UI_Input_KeyboardAndMouse',
 ]
 
+[dependencies.kime-engine-core]
+git = 'https://github.com/xnuk/kime'
+default-features = false
+features = []
+
+[dependencies.kime-engine-backend]
+git = 'https://github.com/xnuk/kime'
+
 [build-dependencies]
 windres = '0.2'

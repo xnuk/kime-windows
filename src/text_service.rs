@@ -7,20 +7,15 @@ use windows::Win32::UI::{
 	Input::KeyboardAndMouse::GetKeyboardState,
 	TextServices::{
 		ITfComposition, ITfCompositionSink, ITfCompositionSink_Impl,
-		ITfContext, ITfDocumentMgr, ITfEditRecord, ITfFunctionProvider,
-		ITfFunctionProvider_Impl, ITfKeyEventSink, ITfKeyEventSink_Impl,
-		ITfKeystrokeMgr, ITfSource, ITfSourceSingle, ITfTextEditSink,
-		ITfTextEditSink_Impl, ITfTextInputProcessor,
-		ITfTextInputProcessor_Impl, ITfTextInputProcessorEx,
-		ITfTextInputProcessorEx_Impl, ITfThreadMgr, ITfThreadMgrEventSink,
-		ITfThreadMgrEventSink_Impl, TF_INVALID_COOKIE,
+		ITfContext, ITfDocumentMgr, ITfEditRecord, ITfKeyEventSink,
+		ITfKeyEventSink_Impl, ITfKeystrokeMgr, ITfSource, ITfTextEditSink,
+		ITfTextEditSink_Impl, ITfTextInputProcessor_Impl,
+		ITfTextInputProcessorEx, ITfTextInputProcessorEx_Impl, ITfThreadMgr,
+		ITfThreadMgrEventSink, ITfThreadMgrEventSink_Impl, TF_INVALID_COOKIE,
 	},
 };
-use windows_core::BSTR;
 
-use crate::{
-	key_event::Key, my_text_service::MyTextService, prelude::*, text_service,
-};
+use crate::{key_event::Key, my_text_service::MyTextService, prelude::*};
 
 #[implement(
 	ITfCompositionSink,
@@ -59,7 +54,6 @@ impl ITfTextInputProcessor_Impl for TextService_Impl {
 		{
 			return Err(E_UNEXPECTED.into());
 		}
-		log::debug!("activate2");
 
 		unsafe {
 			let cookie = thread_mgr.cast::<ITfSource>()?.AdviseSink(
@@ -112,14 +106,14 @@ impl ITfTextInputProcessorEx_Impl for TextService_Impl {
 impl ITfThreadMgrEventSink_Impl for TextService_Impl {
 	fn OnInitDocumentMgr(
 		&self,
-		pdim: WinRef<'_, ITfDocumentMgr>,
+		_pdim: WinRef<'_, ITfDocumentMgr>,
 	) -> WinResult<()> {
 		Ok(())
 	}
 
 	fn OnUninitDocumentMgr(
 		&self,
-		pdim: WinRef<'_, ITfDocumentMgr>,
+		_pdim: WinRef<'_, ITfDocumentMgr>,
 	) -> WinResult<()> {
 		Ok(())
 	}
@@ -172,8 +166,8 @@ impl ITfTextEditSink_Impl for TextService_Impl {
 impl ITfCompositionSink_Impl for TextService_Impl {
 	fn OnCompositionTerminated(
 		&self,
-		ecwrite: u32,
-		pcomposition: WinRef<'_, ITfComposition>,
+		_ecwrite: u32,
+		_pcomposition: WinRef<'_, ITfComposition>,
 	) -> WinResult<()> {
 		self.lock().terminate_composition();
 		Ok(())
@@ -194,40 +188,34 @@ fn to_key(wparam: WPARAM) -> WinResult<Option<Key>> {
 }
 
 impl ITfKeyEventSink_Impl for TextService_Impl {
-	fn OnSetFocus(&self, fforeground: BOOL) -> WinResult<()> {
+	fn OnSetFocus(&self, _fforeground: BOOL) -> WinResult<()> {
 		Ok(())
 	}
 
 	fn OnTestKeyDown(
 		&self,
-		pic: WinRef<'_, ITfContext>,
+		_pic: WinRef<'_, ITfContext>,
 		wparam: WPARAM,
-		lparam: LPARAM,
+		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
-		// TODO
-		log::debug!(
-			"TODO: OnTestKeyDown(wparam: 0x{:x}, lparam: 0x{:x})",
-			wparam.0,
-			lparam.0
-		);
-		// to_key(wparam)?;
-		Ok(false.into())
+		Ok(if let Some(key) = to_key(wparam)? {
+			self.lock().will_handle_keydown(key).into()
+		} else {
+			false.into()
+		})
 	}
 
 	fn OnTestKeyUp(
 		&self,
-		pic: WinRef<'_, ITfContext>,
+		_pic: WinRef<'_, ITfContext>,
 		wparam: WPARAM,
-		lparam: LPARAM,
+		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
-		// TODO
-		log::debug!(
-			"TODO: OnTestKeyUp(wparam: 0x{:x}, lparam: 0x{:x})",
-			wparam.0,
-			lparam.0
-		);
-		// to_key(wparam)?;
-		Ok(false.into())
+		Ok(if let Some(key) = to_key(wparam)? {
+			self.lock().will_handle_keyup(key).into()
+		} else {
+			false.into()
+		})
 	}
 
 	fn OnPreservedKey(
@@ -243,27 +231,25 @@ impl ITfKeyEventSink_Impl for TextService_Impl {
 		&self,
 		pic: WinRef<'_, ITfContext>,
 		wparam: WPARAM,
-		lparam: LPARAM,
+		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
-		log::debug!(
-			"TODO: OnKeyDown(wparam: 0x{:x}, lparam: 0x{:x})",
-			wparam.0,
-			lparam.0
-		);
-		Ok(false.into())
+		Ok(if let Some(key) = to_key(wparam)? {
+			self.lock().keydown(pic.ok()?, key)?.into()
+		} else {
+			false.into()
+		})
 	}
 
 	fn OnKeyUp(
 		&self,
 		pic: WinRef<'_, ITfContext>,
 		wparam: WPARAM,
-		lparam: LPARAM,
+		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
-		log::debug!(
-			"TODO: OnKeyUp(wparam: 0x{:x}, lparam: 0x{:x})",
-			wparam.0,
-			lparam.0
-		);
-		Ok(false.into())
+		Ok(if let Some(key) = to_key(wparam)? {
+			self.lock().keyup(pic.ok()?, key)?.into()
+		} else {
+			false.into()
+		})
 	}
 }

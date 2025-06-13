@@ -39,10 +39,27 @@ impl MyTextService {
 		log::debug!("TODO: terminate_composition");
 	}
 
-	pub fn will_handle_keydown(&self, context: &ITfContext, key: Key) -> bool {
+	pub fn will_handle_keydown(&self, key: Key) -> bool {
+		log::debug!("TODO: will_handle_keydown {key:?}");
 		false
 	}
-	pub fn will_handle_keyup(&self, context: &ITfContext, key: Key) -> bool {
+
+	pub fn will_handle_keyup(&self, key: Key) -> bool {
+		log::debug!("TODO: will_handle_keyup {key:?}");
 		false
+	}
+
+	pub fn keydown(
+		&mut self,
+		context: &ITfContext,
+		key: Key,
+	) -> WinResult<bool> {
+		log::debug!("TODO: keydown {key:?}");
+		Ok(false)
+	}
+
+	pub fn keyup(&mut self, context: &ITfContext, key: Key) -> WinResult<bool> {
+		log::debug!("TODO: keyup {key:?}");
+		Ok(false)
 	}
 }
