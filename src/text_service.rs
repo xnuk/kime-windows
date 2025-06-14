@@ -24,7 +24,6 @@ use crate::{key_event::Key, my_text_service::MyTextService, prelude::*};
 	ITfThreadMgrEventSink,
 	ITfKeyEventSink
 )]
-#[derive(Default)]
 pub struct TextService {
 	inner: RwLock<MyTextService>,
 	client_id: Cell<u32>,
@@ -32,6 +31,14 @@ pub struct TextService {
 }
 
 impl TextService {
+	pub fn new() -> Self {
+		Self {
+			inner: RwLock::new(MyTextService::new()),
+			client_id: Cell::default(),
+			thread_mgr_sink_cookie: Cell::default(),
+		}
+	}
+
 	fn lock(&self) -> RwLockWriteGuard<'_, MyTextService> {
 		self.inner.write().unwrap()
 	}

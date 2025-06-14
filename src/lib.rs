@@ -7,6 +7,7 @@ mod dll;
 mod register;
 
 mod class_factory;
+mod edit_session;
 mod my_text_service;
 mod text_service;
 

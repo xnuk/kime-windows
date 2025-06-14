@@ -19,7 +19,7 @@ impl IClassFactory_Impl for ComFactory_Impl {
 		ppvobject: *mut *mut c_void,
 	) -> WinResult<()> {
 		let text_service: IUnknown =
-			TextService::default().into_object().into_interface();
+			TextService::new().into_object().into_interface();
 		let _result = unsafe { text_service.query(riid, ppvobject) };
 
 		Ok(())

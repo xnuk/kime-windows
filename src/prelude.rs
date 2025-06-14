@@ -9,11 +9,11 @@ pub use windows::Win32::Foundation::{
 };
 use windows::Win32::System::Com::{CLSCTX_INPROC_SERVER, CoCreateInstance};
 pub use windows::core::{
-	BOOL, ComObjectInner, ComObjectInterface, GUID, HRESULT, IUnknown,
+	BOOL, ComObjectInner, ComObjectInterface, GUID, HRESULT, HSTRING, IUnknown,
 	Interface as WinInterface, InterfaceRef, Ref as WinRef,
 	Result as WinResult, implement,
 };
 
 pub unsafe fn co_create_inproc<I: WinInterface>(guid: &GUID) -> WinResult<I> {
-	CoCreateInstance(guid, None, CLSCTX_INPROC_SERVER)
+	unsafe { CoCreateInstance(guid, None, CLSCTX_INPROC_SERVER) }
 }
