@@ -201,12 +201,12 @@ impl ITfKeyEventSink_Impl for TextService_Impl {
 
 	fn OnTestKeyDown(
 		&self,
-		_pic: WinRef<'_, ITfContext>,
+		pic: WinRef<'_, ITfContext>,
 		wparam: WPARAM,
 		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
 		Ok(if let Some(key) = to_key(wparam)? {
-			self.lock().will_handle_keydown(key).into()
+			self.lock().keydown(pic.ok()?, key, true)?.into()
 		} else {
 			false.into()
 		})
@@ -214,12 +214,12 @@ impl ITfKeyEventSink_Impl for TextService_Impl {
 
 	fn OnTestKeyUp(
 		&self,
-		_pic: WinRef<'_, ITfContext>,
+		pic: WinRef<'_, ITfContext>,
 		wparam: WPARAM,
 		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
 		Ok(if let Some(key) = to_key(wparam)? {
-			self.lock().will_handle_keyup(key).into()
+			self.lock().keyup(pic.ok()?, key, true)?.into()
 		} else {
 			false.into()
 		})
@@ -241,7 +241,7 @@ impl ITfKeyEventSink_Impl for TextService_Impl {
 		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
 		Ok(if let Some(key) = to_key(wparam)? {
-			self.lock().keydown(pic.ok()?, key)?.into()
+			self.lock().keydown(pic.ok()?, key, false)?.into()
 		} else {
 			false.into()
 		})
@@ -254,7 +254,7 @@ impl ITfKeyEventSink_Impl for TextService_Impl {
 		_lparam: LPARAM,
 	) -> WinResult<BOOL> {
 		Ok(if let Some(key) = to_key(wparam)? {
-			self.lock().keyup(pic.ok()?, key)?.into()
+			self.lock().keyup(pic.ok()?, key, false)?.into()
 		} else {
 			false.into()
 		})

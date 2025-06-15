@@ -24,6 +24,8 @@ pub struct MyTextService {
 
 	input_engine: InputEngine,
 	config: Config,
+
+	should_next_key_ignored: bool,
 }
 
 impl MyTextService {
@@ -53,6 +55,7 @@ impl MyTextService {
 			composition_sink: None,
 			input_engine: engine,
 			config,
+			should_next_key_ignored: false,
 		}
 	}
 
@@ -88,22 +91,17 @@ impl MyTextService {
 		self.input_engine.reset();
 	}
 
-	pub fn will_handle_keydown(&self, key: Key) -> bool {
-		log::debug!("TODO: will_handle_keydown {key:?}");
-		self.input_engine.will_handle_key(key.0, &self.config)
-	}
-
-	pub fn will_handle_keyup(&self, key: Key) -> bool {
-		log::debug!("TODO: will_handle_keyup {key:?}");
-		false
-	}
-
 	pub fn keydown(
 		&mut self,
 		context: &ITfContext,
 		key: Key,
+		is_test: bool,
 	) -> WinResult<bool> {
-		log::debug!("TODO: keydown {key:?}");
+		if !is_test && self.should_next_key_ignored {
+			self.should_next_key_ignored = false;
+			return Ok(true);
+		}
+
 		let result = self.input_engine.press_key(key.0, &self.config);
 
 		if result.contains(InputResult::HAS_COMMIT) {
@@ -124,11 +122,28 @@ impl MyTextService {
 			self.end_composition(context)?;
 		}
 
-		Ok(result.contains(InputResult::CONSUMED))
+		let consumed = result.contains(InputResult::CONSUMED);
+		log::debug!(
+			"keydown({:?}, test: {is_test}) -> {result:?} ({})",
+			key.0,
+			consumed
+		);
+
+		// OnTestKeyDown이 true이면 OnKeyDown 리턴값은 씹는다 (파폭) -_- 이게 뭐야
+		if is_test && consumed {
+			self.should_next_key_ignored = true;
+		}
+
+		Ok(consumed)
 	}
 
-	pub fn keyup(&mut self, context: &ITfContext, key: Key) -> WinResult<bool> {
-		log::debug!("TODO: keyup {key:?}");
+	pub fn keyup(
+		&mut self,
+		context: &ITfContext,
+		key: Key,
+		is_test: bool,
+	) -> WinResult<bool> {
+		// log::debug!("TODO: keyup {key:?}");
 		Ok(false)
 	}
 
