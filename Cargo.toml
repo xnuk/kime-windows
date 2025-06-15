@@ -8,6 +8,10 @@ rust-version = '1.87.0'
 [lib]
 crate-type = ['cdylib']
 
+[profile.release]
+lto = "thin"
+panic = "abort"
+
 [dependencies]
 anyhow = '1'
 widestring = '1.2.0'
