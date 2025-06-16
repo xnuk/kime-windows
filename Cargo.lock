@@ -183,7 +183,7 @@ dependencies = [
 [[package]]
 name = "kime-engine-backend"
 version = "0.1.0"
-source = "git+https://github.com/xnuk/kime#3a9fa4a9f2800a89ccb0c4a0da0c5d66b9bdd1dc"
+source = "git+https://github.com/xnuk/kime#686226e2c4f7639de76e2ba2d60d769d74eba947"
 dependencies = [
  "bitflags 1.3.2",
  "enum-map",
@@ -195,7 +195,7 @@ dependencies = [
 [[package]]
 name = "kime-engine-backend-hangul"
 version = "0.1.0"
-source = "git+https://github.com/xnuk/kime#3a9fa4a9f2800a89ccb0c4a0da0c5d66b9bdd1dc"
+source = "git+https://github.com/xnuk/kime#686226e2c4f7639de76e2ba2d60d769d74eba947"
 dependencies = [
  "enumset",
  "kime-engine-backend",
@@ -209,7 +209,7 @@ dependencies = [
 [[package]]
 name = "kime-engine-backend-latin"
 version = "0.1.0"
-source = "git+https://github.com/xnuk/kime#3a9fa4a9f2800a89ccb0c4a0da0c5d66b9bdd1dc"
+source = "git+https://github.com/xnuk/kime#686226e2c4f7639de76e2ba2d60d769d74eba947"
 dependencies = [
  "kime-engine-backend",
  "serde",
@@ -219,7 +219,7 @@ dependencies = [
 [[package]]
 name = "kime-engine-config"
 version = "0.1.0"
-source = "git+https://github.com/xnuk/kime#3a9fa4a9f2800a89ccb0c4a0da0c5d66b9bdd1dc"
+source = "git+https://github.com/xnuk/kime#686226e2c4f7639de76e2ba2d60d769d74eba947"
 dependencies = [
  "enum-map",
  "enumset",
@@ -235,7 +235,7 @@ dependencies = [
 [[package]]
 name = "kime-engine-core"
 version = "2.0.0"
-source = "git+https://github.com/xnuk/kime#3a9fa4a9f2800a89ccb0c4a0da0c5d66b9bdd1dc"
+source = "git+https://github.com/xnuk/kime#686226e2c4f7639de76e2ba2d60d769d74eba947"
 dependencies = [
  "fontdb",
  "kime-engine-backend",
@@ -251,7 +251,7 @@ dependencies = [
 [[package]]
 name = "kime-run-dir"
 version = "0.1.0"
-source = "git+https://github.com/xnuk/kime#3a9fa4a9f2800a89ccb0c4a0da0c5d66b9bdd1dc"
+source = "git+https://github.com/xnuk/kime#686226e2c4f7639de76e2ba2d60d769d74eba947"
 
 [[package]]
 name = "lcid"
