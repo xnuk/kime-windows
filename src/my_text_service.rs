@@ -89,6 +89,8 @@ impl MyTextService {
 	pub fn terminate_composition(&mut self) {
 		log::debug!("TODO: terminate_composition");
 		self.input_engine.reset();
+		self.composition = None;
+		self.should_next_key_ignored = false;
 	}
 
 	pub fn keydown(
