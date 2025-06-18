@@ -1,10 +1,9 @@
 use std::cell::OnceCell;
 
 use windows::Win32::UI::TextServices::{
-	GUID_PROP_ATTRIBUTE, ITfComposition, ITfCompositionSink, ITfContext,
-	ITfContextComposition, ITfEditSession, ITfEditSession_Impl,
-	ITfInsertAtSelection, TF_ANCHOR_END, TF_DEFAULT_SELECTION,
-	TF_IAS_QUERYONLY, TF_SELECTION,
+	ITfComposition, ITfCompositionSink, ITfContext, ITfContextComposition,
+	ITfEditSession, ITfEditSession_Impl, ITfInsertAtSelection,
+	TF_IAS_QUERYONLY, TF_ST_CORRECTION,
 };
 
 use crate::prelude::*;
@@ -36,8 +35,6 @@ impl ITfEditSession_Impl for StartComposition_Impl {
 			let selection: ITfInsertAtSelection = self.context.cast()?;
 			selection.InsertTextAtSelection(ec, TF_IAS_QUERYONLY, &[])?
 		};
-
-		log::debug!("range = {range:?}");
 
 		let composition = unsafe {
 			context_composition.StartComposition(
@@ -76,31 +73,7 @@ impl<'a> EndComposition<'a> {
 
 impl ITfEditSession_Impl for EndComposition_Impl<'_> {
 	fn DoEditSession(&self, ec: u32) -> WinResult<()> {
-		unsafe {
-			let range = self.composition.GetRange()?;
-
-			// what is it
-			// let prop = self.context.GetProperty(&GUID_PROP_ATTRIBUTE)?;
-			// prop.Clear(ec, &range)?;
-
-			let mut selection = [TF_SELECTION::default(); 1];
-			let mut selection_len = 0;
-			self.context.GetSelection(
-				ec,
-				TF_DEFAULT_SELECTION,
-				&mut selection,
-				&mut selection_len,
-			)?;
-
-			if let Some(sel_range) = &*selection[0].range {
-				// move and clear
-				// TODO: need to understand
-				sel_range.ShiftEndToRange(ec, &range, TF_ANCHOR_END)?;
-				sel_range.Collapse(ec, TF_ANCHOR_END)?;
-				self.context.SetSelection(ec, &selection)?;
-			}
-			self.composition.EndComposition(ec)?;
-		}
+		unsafe { self.composition.EndComposition(ec) }?;
 
 		Ok(())
 	}
@@ -131,7 +104,8 @@ impl ITfEditSession_Impl for SetCompositionString_Impl<'_> {
 	fn DoEditSession(&self, ec: u32) -> WinResult<()> {
 		unsafe {
 			let range = self.composition.GetRange()?;
-			range.SetText(ec, 0, self.text)?;
+			range.SetText(ec, TF_ST_CORRECTION, self.text)?;
+			// TODO: ^ this causes OnCompositionTerminated on notepad.exe
 		}
 		Ok(())
 	}
