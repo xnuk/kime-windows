@@ -6,18 +6,18 @@
 #pragma code_page(65001)
 
 1 VERSIONINFO
-FILEVERSION 0,1,0,0
-PRODUCTVERSION 0,1,0,0
+FILEVERSION 0,1,1,0
+PRODUCTVERSION 0,1,1,0
 {
 	BLOCK "StringFileInfo" {
 		BLOCK "040904b0" {
-			VALUE "CompanyName", "Prostate"
-			VALUE "FileDescription", "I like dick"
-			VALUE "FileVersion", "0.1.0.0"
-			VALUE "InternalName", "tsf_playground"
-			VALUE "OriginalFilename", "tsf_playground.dll"
-			VALUE "ProductName", "Prostate Massage"
-			VALUE "ProductVersion", "0.1.0.0"
+			VALUE "CompanyName", "Xnuk Shuman"
+			VALUE "FileDescription", "Kime in Windows"
+			VALUE "FileVersion", "0.1.1.0"
+			VALUE "InternalName", "kime_windows"
+			VALUE "OriginalFilename", "kime_windows.dll"
+			VALUE "ProductName", "kime-windows"
+			VALUE "ProductVersion", "0.1.1.0"
 		}
 	}
 	BLOCK "VarFileInfo" {
