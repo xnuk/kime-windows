@@ -1,9 +1,10 @@
-use std::cell::OnceCell;
+use std::{cell::OnceCell, mem::ManuallyDrop};
 
 use windows::Win32::UI::TextServices::{
 	ITfComposition, ITfCompositionSink, ITfContext, ITfContextComposition,
-	ITfEditSession, ITfEditSession_Impl, ITfInsertAtSelection,
-	TF_IAS_QUERYONLY, TF_ST_CORRECTION,
+	ITfEditSession, ITfEditSession_Impl, ITfInsertAtSelection, TF_AE_NONE,
+	TF_ANCHOR_END, TF_DEFAULT_SELECTION, TF_IAS_QUERYONLY, TF_SELECTION,
+	TF_SELECTIONSTYLE, TF_ST_CORRECTION,
 };
 
 use crate::prelude::*;
@@ -49,6 +50,8 @@ impl ITfEditSession_Impl for StartComposition_Impl {
 			self.composition.set(composition).ok();
 		}
 
+		log::debug!("start composition");
+
 		Ok(())
 	}
 }
@@ -73,7 +76,27 @@ impl<'a> EndComposition<'a> {
 
 impl ITfEditSession_Impl for EndComposition_Impl<'_> {
 	fn DoEditSession(&self, ec: u32) -> WinResult<()> {
+		let mut selection = [TF_SELECTION::default()];
+		let mut fetched = 0;
+		let get_selection = unsafe {
+			self.context.GetSelection(
+				ec,
+				TF_DEFAULT_SELECTION,
+				&mut selection,
+				&mut fetched,
+			)
+		};
+		if get_selection.is_ok() {
+			if let Some(range) = &*selection[0].range {
+				// unsafe { range.ShiftEndToRange(ec, range, TF_ANCHOR_END) }?;
+				unsafe { range.Collapse(ec, TF_ANCHOR_END) }?;
+				selection[0].style.fInterimChar = false.into();
+				unsafe { self.context.SetSelection(ec, &selection) }?;
+			}
+		}
 		unsafe { self.composition.EndComposition(ec) }?;
+
+		log::debug!("end composition");
 
 		Ok(())
 	}
@@ -102,11 +125,22 @@ impl<'a> SetCompositionString<'a> {
 
 impl ITfEditSession_Impl for SetCompositionString_Impl<'_> {
 	fn DoEditSession(&self, ec: u32) -> WinResult<()> {
-		unsafe {
-			let range = self.composition.GetRange()?;
-			range.SetText(ec, TF_ST_CORRECTION, self.text)?;
-			// TODO: ^ this causes OnCompositionTerminated on notepad.exe
-		}
+		let range = unsafe { self.composition.GetRange() }?;
+		unsafe { range.SetText(ec, TF_ST_CORRECTION, self.text) }?;
+
+		let selection = TF_SELECTION {
+			range: ManuallyDrop::new(Some(range)),
+			style: TF_SELECTIONSTYLE {
+				ase: TF_AE_NONE,
+				fInterimChar: true.into(),
+			},
+		};
+
+		// Without this, OnCompositionTerminated triggers on notepad.exe
+		unsafe { self.context.SetSelection(ec, &[selection]) }?;
+
+		log::debug!("set composition string");
+
 		Ok(())
 	}
 }
