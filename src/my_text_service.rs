@@ -2,12 +2,12 @@ use kime_engine_core::{Config, InputEngine, InputResult};
 use widestring::U16CString;
 use windows::Win32::UI::{
 	TextServices::{
-		ITfComposition, ITfCompositionSink, ITfContext, ITfThreadMgr,
-		TF_ES_READWRITE, TF_ES_SYNC,
+		ITfComposition, ITfCompositionSink, ITfContext, ITfEditSession,
+		ITfThreadMgr, TF_ES_READWRITE, TF_ES_SYNC,
 	},
 	WindowsAndMessaging::{MB_OK, MessageBoxW},
 };
-use windows_core::{InterfaceRef, PCWSTR, w};
+use windows_core::{ComObject, InterfaceRef, PCWSTR, w};
 
 use crate::{
 	config::read_config,
@@ -155,15 +155,7 @@ impl MyTextService {
 		};
 		let session =
 			StartComposition::new(context.clone(), sink.clone()).into_object();
-		unsafe {
-			context
-				.RequestEditSession(
-					self.client_id,
-					session.as_interface(),
-					TF_ES_SYNC | TF_ES_READWRITE,
-				)?
-				.ok()?;
-		}
+		self.request_edit_session(context, &session)?;
 
 		self.composition = session.composition.get().cloned();
 
@@ -174,17 +166,11 @@ impl MyTextService {
 		let Some(composition) = &self.composition else {
 			return Ok(());
 		};
-		let session = EndComposition::new(context, composition).into_object();
-		unsafe {
-			context
-				.RequestEditSession(
-					self.client_id,
-					session.as_interface(),
-					TF_ES_SYNC | TF_ES_READWRITE,
-				)?
-				.ok()?;
+		{
+			let session =
+				EndComposition::new(context, composition).into_object();
+			self.request_edit_session(context, &session)?;
 		}
-		drop(session);
 		self.composition = None;
 
 		Ok(())
@@ -201,13 +187,27 @@ impl MyTextService {
 		let text = HSTRING::from(text);
 		let session = SetCompositionString::new(context, composition, &text)
 			.into_object();
-		unsafe {
-			let _ = context.RequestEditSession(
-				self.client_id,
-				session.as_interface(),
-				TF_ES_SYNC | TF_ES_READWRITE,
-			);
-		}
+		self.request_edit_session(context, &session)?;
 		Ok(())
+	}
+
+	fn request_edit_session<T>(
+		&self,
+		context: &ITfContext,
+		session: &ComObject<T>,
+	) -> WinResult<()>
+	where
+		T: ComObjectInner,
+		T::Outer: ComObjectInterface<ITfEditSession>,
+	{
+		unsafe {
+			context
+				.RequestEditSession(
+					self.client_id,
+					session.as_interface(),
+					TF_ES_SYNC | TF_ES_READWRITE,
+				)?
+				.ok()
+		}
 	}
 }
